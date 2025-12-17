@@ -1,7 +1,7 @@
-#include "Game.h"
-#include "Renderer.h"
-#include "Tile.h"
-#include "Window.h"
+#include <tiletwister/game/Game.h>
+#include <tiletwister/game/Tile.h>
+#include <tiletwister/platform/Window.h>
+#include <tiletwister/render/Renderer.h>
 
 #include <SDL2/SDL.h>
 
@@ -71,10 +71,6 @@ int main(int, char**) {
     const MoveResult mr = game.tryMove(dir);
     if (!mr.moved) return;
 
-    // Rebuild tiles from pre-move visuals by interpreting animations.
-    // Simplicity: start from current grid state (post-merge, pre-spawn) and
-    // reconstruct sliding animations by mapping from/to on the old positions.
-    // This approach is robust enough for the assignment visuals.
     tiles.clear();
 
     // Build tiles from animations sources (they represent the visual tiles).
@@ -151,6 +147,7 @@ int main(int, char**) {
         // Commit spawn and rebuild final board tiles.
         game.commitPendingSpawn();
         rebuildTilesFromGrid();
+
         // Pop merged destinations.
         for (const Cell& c : activeMove.pendingPopCells) {
           for (auto& kv : tiles) {

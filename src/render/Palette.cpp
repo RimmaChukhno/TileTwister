@@ -1,53 +1,28 @@
-#include "Utils.h"
+#include <tiletwister/render/Palette.h>
 
-#include <algorithm>
-#include <chrono>
+#include <tiletwister/core/Utils.h>
 
-namespace Utils {
+namespace {
 
-std::mt19937& rng() {
-  static std::mt19937 gen(static_cast<std::mt19937::result_type>(
-      std::chrono::high_resolution_clock::now().time_since_epoch().count()));
-  return gen;
+static SDL_Color mix(SDL_Color a, SDL_Color b, float t) {
+  t = Utils::clampf(t, 0.0f, 1.0f);
+  return SDL_Color{
+      static_cast<Uint8>(Utils::lerp(a.r, b.r, t)),
+      static_cast<Uint8>(Utils::lerp(a.g, b.g, t)),
+      static_cast<Uint8>(Utils::lerp(a.b, b.b, t)),
+      255,
+  };
 }
 
-int randInt(int loInclusive, int hiInclusive) {
-  std::uniform_int_distribution<int> dist(loInclusive, hiInclusive);
-  return dist(rng());
-}
+} // namespace
 
-bool chance(int numerator, int denominator) {
-  if (denominator <= 0) return false;
-  return randInt(1, denominator) <= numerator;
-}
-
-float clampf(float v, float lo, float hi) {
-  return std::max(lo, std::min(v, hi));
-}
-
-float lerp(float a, float b, float t) { return a + (b - a) * t; }
-
-float easeOutCubic(float t) {
-  t = clampf(t, 0.0f, 1.0f);
-  const float u = 1.0f - t;
-  return 1.0f - u * u * u;
-}
+namespace Palette {
 
 SDL_Color backgroundPink() { return SDL_Color{255, 182, 193, 255}; }
 
 SDL_Color tileBorderColor() { return SDL_Color{255, 255, 255, 70}; }
 
 SDL_Color gridEmptyCellColor() { return SDL_Color{255, 255, 255, 45}; }
-
-static SDL_Color mix(SDL_Color a, SDL_Color b, float t) {
-  t = clampf(t, 0.0f, 1.0f);
-  return SDL_Color{
-      static_cast<Uint8>(lerp(a.r, b.r, t)),
-      static_cast<Uint8>(lerp(a.g, b.g, t)),
-      static_cast<Uint8>(lerp(a.b, b.b, t)),
-      255,
-  };
-}
 
 SDL_Color tileColor(int value) {
   // Pleasant palette that gets more saturated as the value increases.
@@ -86,17 +61,6 @@ SDL_Color tileColor(int value) {
   return stops[sizeof(stops) / sizeof(stops[0]) - 1].c;
 }
 
-std::vector<std::pair<int, int>> emptyCells(const int grid[4][4]) {
-  std::vector<std::pair<int, int>> out;
-  out.reserve(16);
-  for (int r = 0; r < 4; ++r) {
-    for (int c = 0; c < 4; ++c) {
-      if (grid[r][c] == 0) out.emplace_back(r, c);
-    }
-  }
-  return out;
-}
-
-} // namespace Utils
+} // namespace Palette
 
 

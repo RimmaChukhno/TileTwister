@@ -1,6 +1,6 @@
-#include "Tile.h"
+#include <tiletwister/game/Tile.h>
 
-#include "Utils.h"
+#include <tiletwister/core/Utils.h>
 
 Tile::Tile(int value, Cell cell) : m_value(value), m_cell(cell) {}
 

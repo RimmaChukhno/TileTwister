@@ -1,6 +1,4 @@
-#include "Window.h"
-
-#include <SDL2/SDL.h>
+#include <tiletwister/platform/Window.h>
 
 Window::~Window() { shutdown(); }
 

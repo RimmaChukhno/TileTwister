@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-
-#include "Game.h"
+#include <tiletwister/game/Game.h>
 
 struct TileAnim {
   bool active = false;

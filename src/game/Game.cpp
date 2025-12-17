@@ -1,6 +1,6 @@
-#include "Game.h"
+#include <tiletwister/game/Game.h>
 
-#include "Utils.h"
+#include <tiletwister/core/Utils.h>
 
 #include <array>
 #include <cstring>

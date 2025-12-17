@@ -9,6 +9,7 @@
       "cppStandard": "c++17",
       "includePath": [
         "${workspaceFolder}/**",
+        "${workspaceFolder}/include",
         "C:/msys64/mingw64/include"
       ],
       "defines": []

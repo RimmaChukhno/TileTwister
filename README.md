@@ -6,15 +6,25 @@ Small 2048-inspired puzzle game in **C++** using **SDL2** (pink background, anim
 
 This repo is set up for **MSYS2 MinGW64** installed at `C:\msys64\...`.
 
-- **Build the game**:
+- **Build the game (Makefile)**:
 
   - From PowerShell:
     - `C:\msys64\usr\bin\make.exe`
+    - `.\build\main.exe`
 
-- **Run tests (logic-only)**:
+- **Run tests (logic-only, Makefile)**:
   - From PowerShell:
     - `C:\msys64\usr\bin\make.exe test`
-    - `.\tests.exe`
+    - `.\build\tests.exe`
+
+- **Build with CMake (recommended for IDEs)**:
+  - Configure:
+    - `cmake -S . -B build/cmake -G "MinGW Makefiles"`
+  - Build:
+    - `cmake --build build/cmake`
+  - Run:
+    - `.\build\cmake\tiletwister.exe`
+    - `.\build\cmake\tiletwister_tests.exe`
 
 ## Controls
 
@@ -24,17 +34,12 @@ This repo is set up for **MSYS2 MinGW64** installed at `C:\msys64\...`.
 
 ## Project structure
 
-- `main.cpp`: entry point + main loop
-- `Game.h/.cpp`: 2048 logic (moves, merges, spawn, game-over)
-- `Tile.h/.cpp`: tile animation (slide + merge/spawn pop)
-- `Window.h/.cpp`: SDL2 init + window/renderer creation
-- `Renderer.h/.cpp`: drawing (board, tiles, value text)
-- `Utils.h/.cpp`: RNG, easing, colors
-- `tests.cpp`: integration-ish tests for logic (no SDL window)
-
+- `include/tiletwister/**`: public headers
+- `src/**`: implementation
+- `tests/**`: logic tests (no SDL window)
 
 ## Start
 
 mingw32-make
-.\main.exe
+.\build\main.exe
 

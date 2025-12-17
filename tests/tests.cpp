@@ -1,5 +1,5 @@
-#include "Game.h"
-#include "Utils.h"
+#include <tiletwister/game/Game.h>
+#include <tiletwister/core/Utils.h>
 
 #include <cassert>
 #include <cstring>

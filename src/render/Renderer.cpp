@@ -1,8 +1,8 @@
-#include "Renderer.h"
+#include <tiletwister/render/Renderer.h>
 
-#include "Game.h"
-#include "Tile.h"
-#include "Utils.h"
+#include <tiletwister/game/Game.h>
+#include <tiletwister/game/Tile.h>
+#include <tiletwister/render/Palette.h>
 
 #include <algorithm>
 #include <cmath>
@@ -46,13 +46,10 @@ SDL_Rect Renderer::cellRect(int windowW, int windowH, float row,
 
 void Renderer::fillRoundRect(SDL_Renderer* r, const SDL_Rect& rect, int radius,
                              SDL_Color color) const {
-  // Simple approximation: fill rect + 4 corner circles.
-  // (Good enough for this project, keeps dependencies minimal.)
+  // Simple approximation: fill rect.
+  // (Keeping dependencies minimal.)
   setColor(r, color);
   SDL_RenderFillRect(r, &rect);
-
-  // Cut corners by overdrawing background would require stencil; instead draw
-  // a softer look via border & slight alpha. Keep it simple here.
   (void)radius;
 }
 
@@ -148,7 +145,7 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
                       const std::unordered_map<int, Tile>& tiles, int windowW,
                       int windowH, bool gameOver) {
   // Background
-  setColor(r, Utils::backgroundPink());
+  setColor(r, Palette::backgroundPink());
   SDL_RenderClear(r);
 
   // Board base
@@ -160,7 +157,7 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
     for (int cc = 0; cc < 4; ++cc) {
       SDL_Rect cell = cellRect(windowW, windowH, static_cast<float>(rr),
                                static_cast<float>(cc));
-      fillRoundRect(r, cell, 12, Utils::gridEmptyCellColor());
+      fillRoundRect(r, cell, 12, Palette::gridEmptyCellColor());
     }
   }
 
@@ -190,10 +187,10 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
       rect.y = cy - rect.h / 2;
     }
 
-    fillRoundRect(r, rect, 12, Utils::tileColor(t->value()));
+    fillRoundRect(r, rect, 12, Palette::tileColor(t->value()));
 
     // Border
-    setColor(r, Utils::tileBorderColor());
+    setColor(r, Palette::tileBorderColor());
     SDL_RenderDrawRect(r, &rect);
 
     drawNumber(r, rect, t->value());
@@ -203,8 +200,6 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
     // Simple overlay
     setColor(r, SDL_Color{0, 0, 0, 120});
     SDL_RenderFillRect(r, &b);
-    // "GAME OVER" using digits isn't possible; show 2048-style by drawing 0
-    // and rely on instructions (R to restart). Keep minimal.
   }
 
   SDL_RenderPresent(r);
