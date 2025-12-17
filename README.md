@@ -33,7 +33,7 @@ This repo is set up for **MSYS2 MinGW64** installed at `C:\msys64\...`.
 - `tests.cpp`: integration-ish tests for logic (no SDL window)
 
 
-## Lancer
+## Start
 
 mingw32-make
 .\main.exe
