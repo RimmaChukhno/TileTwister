@@ -44,6 +44,7 @@ target_include_directories(tiletwister_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DI
 # ---- App ----
 add_executable(tiletwister
   src/app/main.cpp
+  src/app/GameControllerObject.cpp
 )
 target_include_directories(tiletwister PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(tiletwister PRIVATE tiletwister_game tiletwister_render tiletwister_platform ${TILETWISTER_SDL_LIBS})
