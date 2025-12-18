@@ -1,5 +1,5 @@
-#include <tiletwister/game/Game.h>
-#include <tiletwister/core/Utils.h>
+#include <tiletwister/game/Game.hpp>
+#include <tiletwister/core/Utils.hpp>
 
 #include <cassert>
 #include <cstring>

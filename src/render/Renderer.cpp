@@ -1,8 +1,8 @@
-#include <tiletwister/render/Renderer.h>
+#include <tiletwister/render/Renderer.hpp>
 
-#include <tiletwister/game/Game.h>
-#include <tiletwister/game/Tile.h>
-#include <tiletwister/render/Palette.h>
+#include <tiletwister/game/Game.hpp>
+#include <tiletwister/game/Tile.hpp>
+#include <tiletwister/render/Palette.hpp>
 
 #include <algorithm>
 #include <cmath>

@@ -1,6 +1,6 @@
-#include <tiletwister/render/Palette.h>
+#include <tiletwister/render/Palette.hpp>
 
-#include <tiletwister/core/Utils.h>
+#include <tiletwister/core/Utils.hpp>
 
 namespace {
 

@@ -1,7 +1,7 @@
-#include <tiletwister/game/Game.h>
-#include <tiletwister/game/Tile.h>
-#include <tiletwister/platform/Window.h>
-#include <tiletwister/render/Renderer.h>
+#include <tiletwister/game/Game.hpp>
+#include <tiletwister/game/Tile.hpp>
+#include <tiletwister/platform/Window.hpp>
+#include <tiletwister/render/Renderer.hpp>
 
 #include <SDL2/SDL.h>
 

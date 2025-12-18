@@ -1,4 +1,4 @@
-#include <tiletwister/core/Utils.h>
+#include <tiletwister/core/Utils.hpp>
 
 #include <algorithm>
 #include <chrono>

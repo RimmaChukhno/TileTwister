@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tiletwister/game/Game.h>
+#include <tiletwister/game/Game.hpp>
 
 struct TileAnim {
   bool active = false;

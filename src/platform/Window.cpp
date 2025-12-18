@@ -1,4 +1,4 @@
-#include <tiletwister/platform/Window.h>
+#include <tiletwister/platform/Window.hpp>
 
 Window::~Window() { shutdown(); }
 
