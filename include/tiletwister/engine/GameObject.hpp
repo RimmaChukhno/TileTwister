@@ -1,6 +1,8 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+// Keep the engine layer light: forward declare SDL types.
+struct SDL_Renderer;
+union SDL_Event;
 
 class GameObject {
 public:
