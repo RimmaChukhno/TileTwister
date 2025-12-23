@@ -76,25 +76,29 @@ void Renderer::drawDigit(SDL_Renderer* r, int digit, int x, int y, int w, int h,
   const int mask = (digit >= 0 && digit <= 9) ? segs[digit] : 0;
   setColor(r, color);
 
-  const int t = std::max(2, w / 6); // segment thickness
-  const int pad = std::max(2, t / 2);
+  // Segment thickness scales with both width and height so it doesn't bloat
+  // when digits get narrow (e.g. 4+ digits in a tile).
+  const int minSide = std::max(1, std::min(w, h));
+  const int t = std::max(1, minSide / 7); // segment thickness
+  const int pad = std::max(1, t);         // inner padding
 
   auto segRect = [&](char seg) -> SDL_Rect {
     switch (seg) {
     case 'a':
-      return SDL_Rect{x + pad, y, w - 2 * pad, t};
+      return SDL_Rect{x + pad, y + pad, w - 2 * pad, t};
     case 'd':
-      return SDL_Rect{x + pad, y + h - t, w - 2 * pad, t};
+      return SDL_Rect{x + pad, y + h - t - pad, w - 2 * pad, t};
     case 'g':
       return SDL_Rect{x + pad, y + (h - t) / 2, w - 2 * pad, t};
     case 'f':
-      return SDL_Rect{x, y + pad, t, (h - 3 * pad) / 2};
+      return SDL_Rect{x + pad, y + pad, t, (h - 3 * pad) / 2};
     case 'b':
-      return SDL_Rect{x + w - t, y + pad, t, (h - 3 * pad) / 2};
+      return SDL_Rect{x + w - t - pad, y + pad, t, (h - 3 * pad) / 2};
     case 'e':
-      return SDL_Rect{x, y + (h + pad) / 2, t, (h - 3 * pad) / 2};
+      return SDL_Rect{x + pad, y + (h + pad) / 2, t, (h - 3 * pad) / 2};
     case 'c':
-      return SDL_Rect{x + w - t, y + (h + pad) / 2, t, (h - 3 * pad) / 2};
+      return SDL_Rect{x + w - t - pad, y + (h + pad) / 2, t,
+                      (h - 3 * pad) / 2};
     default:
       return SDL_Rect{x, y, 0, 0};
     }
@@ -126,18 +130,29 @@ void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
 
   const SDL_Color color = textColorFor(value);
 
-  // Fit digits inside rect.
-  const int maxDigits = static_cast<int>(s.size());
-  const int digitW = std::max(10, rect.w / std::max(2, maxDigits));
-  const int digitH = std::max(18, rect.h / 2);
-  const int totalW = digitW * maxDigits + (maxDigits - 1) * (digitW / 6);
+  // Fit digits inside rect with explicit padding so numbers never overflow.
+  const int digits = static_cast<int>(s.size());
+  const int pad = std::max(6, rect.w / 10);
+  const int availW = std::max(1, rect.w - 2 * pad);
+  const int availH = std::max(1, rect.h - 2 * pad);
+
+  // Gap between digits scales down for narrow layouts.
+  const int gap = std::max(2, availW / 40);
+
+  // Compute digit width so the whole string fits horizontally.
+  const int digitW = std::max(6, (availW - gap * (digits - 1)) / digits);
+
+  // Height: keep a 7-seg aspect (roughly 2:1), but clamp to available height.
+  const int digitH = std::max(10, std::min(availH, digitW * 2));
+
+  const int totalW = digitW * digits + gap * (digits - 1);
   int x = rect.x + (rect.w - totalW) / 2;
   const int y = rect.y + (rect.h - digitH) / 2;
 
   for (char ch : s) {
     const int d = ch - '0';
     drawDigit(r, d, x, y, digitW, digitH, color);
-    x += digitW + (digitW / 6);
+    x += digitW + gap;
   }
 }
 
