@@ -11,21 +11,24 @@
 #include <unordered_map>
 #include <vector>
 
-class GameControllerObject final : public GameObject {
+class GameControllerObject final : public GameObject
+{
 public:
-  explicit GameControllerObject(bool* runningFlag);
+  explicit GameControllerObject(bool *runningFlag);
 
-  void setWindowSize(int w, int h) {
+  void setWindowSize(int w, int h)
+  {
     m_windowW = w;
     m_windowH = h;
   }
 
-  void handleEvent(const SDL_Event& e) override;
+  void handleEvent(const SDL_Event &e) override;
   void update(float dtSec) override;
-  void render(SDL_Renderer* renderer) override;
+  void render(SDL_Renderer *renderer) override;
 
 private:
-  struct ActiveMove {
+  struct ActiveMove
+  {
     bool active = false;
     float timeLeft = 0.0f;
     float duration = 0.12f;
@@ -33,7 +36,7 @@ private:
     std::optional<Cell> pendingSpawnCell;
   };
 
-  bool* m_running = nullptr;
+  bool *m_running = nullptr;
   int m_windowW = 600;
   int m_windowH = 600;
 
@@ -46,6 +49,7 @@ private:
   int m_savedBestScore = -1;
   int m_savedLastScore = -1;
   std::string m_scoresPath = "scores.txt";
+  bool m_gameOverButtonHover = false;
 
   void rebuildTilesFromGrid();
   void beginMove(Direction dir);
@@ -54,5 +58,3 @@ private:
 
   static int keyForCellValue(int r, int c, int value, int ordinal);
 };
-
-

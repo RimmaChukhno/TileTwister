@@ -160,6 +160,62 @@ const char* glyph5x7(char ch) {
            "00100"
            "00100"
            "00100";
+  case 'L':
+    return "10000"
+           "10000"
+           "10000"
+           "10000"
+           "10000"
+           "10000"
+           "11111";
+  case 'J':
+    return "00111"
+           "00010"
+           "00010"
+           "00010"
+           "00010"
+           "10010"
+           "01100";
+  case 'U':
+    return "10001"
+           "10001"
+           "10001"
+           "10001"
+           "10001"
+           "10001"
+           "01110";
+  case 'M':
+    return "10001"
+           "11011"
+           "10101"
+           "10101"
+           "10001"
+           "10001"
+           "10001";
+  case 'N':
+    return "10001"
+           "11001"
+           "10101"
+           "10011"
+           "10001"
+           "10001"
+           "10001";
+  case 'I':
+    return "01110"
+           "00100"
+           "00100"
+           "00100"
+           "00100"
+           "00100"
+           "01110";
+  case '?':
+    return "01110"
+           "10001"
+           "00001"
+           "00010"
+           "00100"
+           "00000"
+           "00100";
   case ' ':
   default:
     return "00000"
@@ -215,7 +271,7 @@ void drawText5x7(SDL_Renderer* r, const std::string& text, const SDL_Rect& rect,
 
 } // namespace
 
-SDL_Rect Renderer::boardRect(int windowW, int windowH) const {
+SDL_Rect Renderer::computeBoardRect(int windowW, int windowH) {
   // Reserve space at the top for the HUD (score/best).
   const int outerMargin = 40;
   const int hudH = 80;
@@ -225,6 +281,29 @@ SDL_Rect Renderer::boardRect(int windowW, int windowH) const {
   const int x = (windowW - size) / 2;
   const int y = hudH + outerMargin;
   return SDL_Rect{x, y, size, size};
+}
+
+SDL_Rect Renderer::computeGameOverPanelRect(int windowW, int windowH) {
+  const SDL_Rect b = computeBoardRect(windowW, windowH);
+  const int w = static_cast<int>(std::round(b.w * 0.86f));
+  const int h = static_cast<int>(std::round(b.h * 0.42f));
+  const int x = b.x + (b.w - w) / 2;
+  const int y = b.y + (b.h - h) / 2;
+  return SDL_Rect{x, y, w, h};
+}
+
+SDL_Rect Renderer::computeGameOverButtonRect(int windowW, int windowH) {
+  const SDL_Rect p = computeGameOverPanelRect(windowW, windowH);
+  const int pad = std::max(12, p.w / 20);
+  const int btnH = std::max(40, p.h / 4);
+  const int x = p.x + pad;
+  const int w = p.w - 2 * pad;
+  const int y = p.y + p.h - pad - btnH;
+  return SDL_Rect{x, y, w, btnH};
+}
+
+SDL_Rect Renderer::boardRect(int windowW, int windowH) const {
+  return computeBoardRect(windowW, windowH);
 }
 
 SDL_Rect Renderer::cellRect(int windowW, int windowH, float row,
@@ -356,7 +435,8 @@ void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
 
 void Renderer::render(SDL_Renderer* r, const Game& game,
                       const std::unordered_map<int, Tile>& tiles, int windowW,
-                      int windowH, int score, int bestScore, bool gameOver) {
+                      int windowH, int score, int bestScore, bool gameOver,
+                      bool gameOverButtonHover) {
   (void)game;
   // Background
   setColor(r, Palette::backgroundPink());
@@ -459,9 +539,34 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
   }
 
   if (gameOver) {
-    // Simple overlay
+    // Dim the board and show a centered "window" with restart button.
     setColor(r, SDL_Color{0, 0, 0, 120});
     SDL_RenderFillRect(r, &b);
+
+    const SDL_Rect panel = computeGameOverPanelRect(windowW, windowH);
+    fillRoundRect(r, panel, 14, SDL_Color{255, 255, 255, 70});
+
+    // Message (no accents in bitmap font): "LE JEU EST TERMINE"
+    const int pad = std::max(12, panel.w / 20);
+    SDL_Rect line1{panel.x + pad, panel.y + pad, panel.w - 2 * pad,
+                   std::max(18, panel.h / 5)};
+    SDL_Rect line2{panel.x + pad, line1.y + line1.h + 6, panel.w - 2 * pad,
+                   std::max(18, panel.h / 5)};
+
+    const SDL_Color msgColor{80, 40, 60, 255};
+    drawText5x7(r, "LE JEU EST", line1, msgColor);
+    drawText5x7(r, "TERMINE", line2, msgColor);
+
+    // Button
+    const SDL_Rect btn = computeGameOverButtonRect(windowW, windowH);
+    const SDL_Color btnFill = gameOverButtonHover ? SDL_Color{255, 255, 255, 110}
+                                                  : SDL_Color{255, 255, 255, 80};
+    fillRoundRect(r, btn, 12, btnFill);
+    setColor(r, SDL_Color{80, 40, 60, 80});
+    SDL_RenderDrawRect(r, &btn);
+
+    SDL_Rect btnText{btn.x + 10, btn.y + 6, btn.w - 20, btn.h - 12};
+    drawText5x7(r, "RECOMMENCER ?", btnText, msgColor);
   }
 
   SDL_RenderPresent(r);

@@ -16,9 +16,15 @@ public:
   Renderer() = default;
   ~Renderer() = default;
 
+  // Layout helpers (exposed so gameplay code can do hit-testing for UI).
+  static SDL_Rect computeBoardRect(int windowW, int windowH);
+  static SDL_Rect computeGameOverPanelRect(int windowW, int windowH);
+  static SDL_Rect computeGameOverButtonRect(int windowW, int windowH);
+
   void render(SDL_Renderer* r, const Game& game,
               const std::unordered_map<int, Tile>& tiles, int windowW,
-              int windowH, int score, int bestScore, bool gameOver);
+              int windowH, int score, int bestScore, bool gameOver,
+              bool gameOverButtonHover);
 
 private:
   // Layout helpers
