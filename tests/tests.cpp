@@ -20,6 +20,10 @@ static void expectGridEq(const Game& g, const int expected[4][4]) {
   }
 }
 
+// Verifies a LEFT move:
+// - compacts tiles toward the left
+// - merges equal values once (2 + 2 => 4)
+// - preserves remaining tile order (final 2 stays after the merged 4)
 static void testMoveLeftSimpleMerge() {
   Game g;
   g.clearPendingSpawnForTest();
@@ -41,6 +45,8 @@ static void testMoveLeftSimpleMerge() {
   expectGridEq(g, expected);
 }
 
+// Verifies the classic 2048 rule "a tile can merge only once per move":
+// [2,2,2,2] moving LEFT becomes [4,4,0,0] (not [8,0,0,0]).
 static void testMoveLeftMergeOnceRule() {
   Game g;
   const int in[4][4] = {
@@ -61,6 +67,8 @@ static void testMoveLeftMergeOnceRule() {
   expectGridEq(g, expected);
 }
 
+// Verifies RIGHT move with two independent merges on the same row:
+// [2,2,4,4] -> [0,0,4,8].
 static void testMoveRightDoubleMerge() {
   Game g;
   const int in[4][4] = {
@@ -81,6 +89,8 @@ static void testMoveRightDoubleMerge() {
   expectGridEq(g, expected);
 }
 
+// Verifies UP move + merge behavior in a column:
+// tiles must compact upward, merge once, and keep leftover below.
 static void testMoveUpColumnMerge() {
   Game g;
   const int in[4][4] = {
@@ -101,6 +111,7 @@ static void testMoveUpColumnMerge() {
   expectGridEq(g, expected);
 }
 
+// Verifies game-over detection on a full grid with no possible merges.
 static void testGameOverDetection() {
   Game g;
   const int in[4][4] = {
@@ -113,6 +124,9 @@ static void testGameOverDetection() {
   assert(g.isGameOver());
 }
 
+// Verifies the spawn pipeline:
+// - after a valid move, Game produces a pending spawn (2 or 4) in an empty cell
+// - commitPendingSpawn() applies exactly that spawn cell/value.
 static void testSpawnPendingAndCommit() {
   Utils::rng().seed(12345); // deterministic
   Game g;
@@ -137,6 +151,11 @@ static void testSpawnPendingAndCommit() {
   assert(g.grid()[c.r][c.c] == v);
 }
 
+// Integration test for the "engine layer":
+// validates that Scene:
+// - calls update() in insertion order
+// - removes objects that report alive()==false after update
+// - renders objects in zIndex() order
 static void testIntegrationSceneLifecycleAndOrdering() {
   struct TraceObject final : public GameObject {
     std::string name;
