@@ -46,6 +46,9 @@ ipch/
 # Logs
 *.log
 
+# Runtime data
+scores.txt
+
 # OS junk
 Thumbs.db
 Desktop.ini

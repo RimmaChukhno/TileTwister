@@ -7,6 +7,7 @@
 #include <tiletwister/render/Renderer.hpp>
 
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -41,9 +42,15 @@ private:
   std::unordered_map<int, Tile> m_tiles;
   ActiveMove m_activeMove{};
   int m_bestScore = 0; // persists across restarts in this controller instance
+  int m_lastScore = 0;
+  int m_savedBestScore = -1;
+  int m_savedLastScore = -1;
+  std::string m_scoresPath = "scores.txt";
 
   void rebuildTilesFromGrid();
   void beginMove(Direction dir);
+  void loadScores();
+  void saveScoresIfNeeded(bool force);
 
   static int keyForCellValue(int r, int c, int value, int ordinal);
 };

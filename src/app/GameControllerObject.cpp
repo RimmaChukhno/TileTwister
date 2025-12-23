@@ -4,10 +4,95 @@
 
 #include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <sstream>
 
 GameControllerObject::GameControllerObject(bool* runningFlag)
     : m_running(runningFlag) {
+  loadScores();
   rebuildTilesFromGrid();
+}
+
+void GameControllerObject::loadScores() {
+  // Format (simple + human-editable):
+  // best=<int>
+  // last=<int>
+  //
+  // Backward compatible: if file contains just 1 or 2 integers, treat them as
+  // best then last.
+  std::ifstream in(m_scoresPath);
+  if (!in.is_open()) return;
+
+  int best = 0;
+  int last = 0;
+  bool bestSet = false;
+  bool lastSet = false;
+
+  std::string line;
+  while (std::getline(in, line)) {
+    // Trim
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+      line.pop_back();
+    if (line.empty()) continue;
+
+    auto parseInt = [](const std::string& s, int& out) -> bool {
+      std::istringstream ss(s);
+      ss >> out;
+      return !ss.fail();
+    };
+
+    const std::string bestPrefix = "best=";
+    const std::string lastPrefix = "last=";
+    if (line.rfind(bestPrefix, 0) == 0) {
+      int v = 0;
+      if (parseInt(line.substr(bestPrefix.size()), v)) {
+        best = std::max(0, v);
+        bestSet = true;
+      }
+      continue;
+    }
+    if (line.rfind(lastPrefix, 0) == 0) {
+      int v = 0;
+      if (parseInt(line.substr(lastPrefix.size()), v)) {
+        last = std::max(0, v);
+        lastSet = true;
+      }
+      continue;
+    }
+
+    // Fallback: plain integer lines
+    int v = 0;
+    if (parseInt(line, v)) {
+      if (!bestSet) {
+        best = std::max(0, v);
+        bestSet = true;
+      } else if (!lastSet) {
+        last = std::max(0, v);
+        lastSet = true;
+      }
+    }
+  }
+
+  m_bestScore = best;
+  m_lastScore = last;
+  m_savedBestScore = m_bestScore;
+  m_savedLastScore = m_lastScore;
+}
+
+void GameControllerObject::saveScoresIfNeeded(bool force) {
+  const int best = std::max(0, m_bestScore);
+  const int last = std::max(0, m_lastScore);
+
+  if (!force && best == m_savedBestScore && last == m_savedLastScore) return;
+
+  std::ofstream out(m_scoresPath, std::ios::trunc);
+  if (!out.is_open()) return;
+
+  out << "best=" << best << "\n";
+  out << "last=" << last << "\n";
+
+  m_savedBestScore = best;
+  m_savedLastScore = last;
 }
 
 int GameControllerObject::keyForCellValue(int r, int c, int value, int ordinal) {
@@ -39,7 +124,10 @@ void GameControllerObject::beginMove(Direction dir) {
   const MoveResult mr = m_game.tryMove(dir);
   if (!mr.moved) return;
 
-  if (m_game.score() > m_bestScore) m_bestScore = m_game.score();
+  if (m_game.score() > m_bestScore) {
+    m_bestScore = m_game.score();
+    saveScoresIfNeeded(false);
+  }
 
   m_tiles.clear();
 
@@ -81,11 +169,18 @@ void GameControllerObject::handleEvent(const SDL_Event& e) {
 
   const SDL_Keycode key = e.key.keysym.sym;
   if (key == SDLK_ESCAPE) {
+    // Persist best/last on quit.
+    saveScoresIfNeeded(true);
     if (m_running) *m_running = false;
     return;
   }
 
   if (key == SDLK_r) {
+    // Save last run score + possibly update best, then reset.
+    m_lastScore = std::max(0, m_game.score());
+    if (m_lastScore > m_bestScore) m_bestScore = m_lastScore;
+    saveScoresIfNeeded(true);
+
     m_game.reset();
     // Keep best score across resets.
     m_activeMove.active = false;
@@ -105,7 +200,10 @@ void GameControllerObject::handleEvent(const SDL_Event& e) {
 void GameControllerObject::update(float dtSec) {
   for (auto& kv : m_tiles) kv.second.update(dtSec);
 
-  if (m_game.score() > m_bestScore) m_bestScore = m_game.score();
+  if (m_game.score() > m_bestScore) {
+    m_bestScore = m_game.score();
+    saveScoresIfNeeded(false);
+  }
 
   if (!m_activeMove.active) return;
 
@@ -139,6 +237,9 @@ void GameControllerObject::update(float dtSec) {
 
   m_activeMove.pendingPopCells.clear();
   m_activeMove.pendingSpawnCell.reset();
+
+  // If the move ended (spawn committed) and score just increased, persist.
+  saveScoresIfNeeded(false);
 }
 
 void GameControllerObject::render(SDL_Renderer* renderer) {
