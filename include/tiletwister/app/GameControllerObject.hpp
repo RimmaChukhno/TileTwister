@@ -40,6 +40,7 @@ private:
   Renderer m_renderer;
   std::unordered_map<int, Tile> m_tiles;
   ActiveMove m_activeMove{};
+  int m_bestScore = 0; // persists across restarts in this controller instance
 
   void rebuildTilesFromGrid();
   void beginMove(Direction dir);

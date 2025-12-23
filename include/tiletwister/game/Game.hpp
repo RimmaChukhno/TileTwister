@@ -41,6 +41,8 @@ public:
 
   bool isGameOver() const;
 
+  int score() const { return m_score; }
+
   const int (&grid() const)[4][4] { return m_grid; }
 
   // Test helpers (logic-only; not used by the SDL gameplay loop).
@@ -50,6 +52,7 @@ public:
 private:
   int m_grid[4][4]{};
   std::optional<std::pair<Cell, int>> m_pendingSpawn;
+  int m_score = 0;
 
   void clearGrid();
   void spawnInitial();

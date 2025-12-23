@@ -18,7 +18,7 @@ public:
 
   void render(SDL_Renderer* r, const Game& game,
               const std::unordered_map<int, Tile>& tiles, int windowW,
-              int windowH, bool gameOver);
+              int windowH, int score, int bestScore, bool gameOver);
 
 private:
   // Layout helpers

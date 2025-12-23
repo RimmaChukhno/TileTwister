@@ -20,12 +20,130 @@ void setColor(SDL_Renderer* r, SDL_Color c) {
   SDL_SetRenderDrawColor(r, c.r, c.g, c.b, c.a);
 }
 
+// Minimal 5x7 bitmap font for the HUD labels.
+// Only includes characters needed for "SCORE" and "BEST".
+const char* glyph5x7(char ch) {
+  switch (ch) {
+  case 'S':
+    return "01111"
+           "10000"
+           "10000"
+           "01110"
+           "00001"
+           "00001"
+           "11110";
+  case 'C':
+    return "01111"
+           "10000"
+           "10000"
+           "10000"
+           "10000"
+           "10000"
+           "01111";
+  case 'O':
+    return "01110"
+           "10001"
+           "10001"
+           "10001"
+           "10001"
+           "10001"
+           "01110";
+  case 'R':
+    return "11110"
+           "10001"
+           "10001"
+           "11110"
+           "10100"
+           "10010"
+           "10001";
+  case 'E':
+    return "11111"
+           "10000"
+           "10000"
+           "11110"
+           "10000"
+           "10000"
+           "11111";
+  case 'B':
+    return "11110"
+           "10001"
+           "10001"
+           "11110"
+           "10001"
+           "10001"
+           "11110";
+  case 'T':
+    return "11111"
+           "00100"
+           "00100"
+           "00100"
+           "00100"
+           "00100"
+           "00100";
+  case ' ':
+  default:
+    return "00000"
+           "00000"
+           "00000"
+           "00000"
+           "00000"
+           "00000"
+           "00000";
+  }
+}
+
+void drawText5x7(SDL_Renderer* r, const std::string& text, const SDL_Rect& rect,
+                 SDL_Color color) {
+  setColor(r, color);
+  const int cols = 5;
+  const int rows = 7;
+  const int gapPx = std::max(1, rect.w / 80);
+  const int charGap = std::max(1, gapPx * 2);
+
+  const int n = static_cast<int>(text.size());
+  if (n <= 0) return;
+
+  // Compute pixel size so the text fits.
+  const int availW = std::max(1, rect.w);
+  const int availH = std::max(1, rect.h);
+  const int cellW = std::max(1, (availW - (n - 1) * charGap) / (n * cols));
+  const int cellH = std::max(1, availH / rows);
+  const int cell = std::min(cellW, cellH);
+
+  const int textW = n * cols * cell + (n - 1) * charGap;
+  const int textH = rows * cell;
+  int x0 = rect.x + (rect.w - textW) / 2;
+  int y0 = rect.y + (rect.h - textH) / 2;
+
+  for (int i = 0; i < n; ++i) {
+    const char up =
+        (text[i] >= 'a' && text[i] <= 'z') ? (text[i] - 'a' + 'A') : text[i];
+    const char* g = glyph5x7(up);
+    for (int ry = 0; ry < rows; ++ry) {
+      for (int cx = 0; cx < cols; ++cx) {
+        const char bit = g[ry * cols + cx];
+        if (bit == '1') {
+          SDL_Rect px{ x0 + i * (cols * cell + charGap) + cx * cell,
+                       y0 + ry * cell,
+                       cell, cell };
+          SDL_RenderFillRect(r, &px);
+        }
+      }
+    }
+  }
+}
+
 } // namespace
 
 SDL_Rect Renderer::boardRect(int windowW, int windowH) const {
-  const int size = std::min(windowW, windowH) - 80;
+  // Reserve space at the top for the HUD (score/best).
+  const int outerMargin = 40;
+  const int hudH = 80;
+  const int availW = windowW - 2 * outerMargin;
+  const int availH = windowH - hudH - 2 * outerMargin;
+  const int size = std::max(200, std::min(availW, availH));
   const int x = (windowW - size) / 2;
-  const int y = (windowH - size) / 2;
+  const int y = hudH + outerMargin;
   return SDL_Rect{x, y, size, size};
 }
 
@@ -158,13 +276,50 @@ void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
 
 void Renderer::render(SDL_Renderer* r, const Game& game,
                       const std::unordered_map<int, Tile>& tiles, int windowW,
-                      int windowH, bool gameOver) {
+                      int windowH, int score, int bestScore, bool gameOver) {
+  (void)game;
   // Background
   setColor(r, Palette::backgroundPink());
   SDL_RenderClear(r);
 
   // Board base
   const SDL_Rect b = boardRect(windowW, windowH);
+
+  // HUD (top area)
+  {
+    const int hudTop = 12;
+    const int hudBottom = std::max(hudTop + 10, b.y - 12);
+    const int hudH = std::max(40, hudBottom - hudTop);
+    const SDL_Rect hudArea{b.x, hudTop, b.w, hudH};
+
+    const int gap = 12;
+    const int boxW = (hudArea.w - gap) / 2;
+    const SDL_Rect scoreBox{hudArea.x, hudArea.y, boxW, hudArea.h};
+    const SDL_Rect bestBox{hudArea.x + boxW + gap, hudArea.y, boxW, hudArea.h};
+
+    fillRoundRect(r, scoreBox, 12, SDL_Color{255, 255, 255, 45});
+    fillRoundRect(r, bestBox, 12, SDL_Color{255, 255, 255, 45});
+
+    const int pad = 10;
+    const int labelH = std::max(16, scoreBox.h / 3);
+
+    SDL_Rect scoreLabel{scoreBox.x + pad, scoreBox.y + pad,
+                        scoreBox.w - 2 * pad, labelH};
+    SDL_Rect bestLabel{bestBox.x + pad, bestBox.y + pad,
+                       bestBox.w - 2 * pad, labelH};
+    SDL_Rect scoreNum{scoreBox.x + pad, scoreBox.y + pad + labelH,
+                      scoreBox.w - 2 * pad, scoreBox.h - (2 * pad + labelH)};
+    SDL_Rect bestNum{bestBox.x + pad, bestBox.y + pad + labelH,
+                     bestBox.w - 2 * pad, bestBox.h - (2 * pad + labelH)};
+
+    const SDL_Color labelColor{80, 40, 60, 255};
+    drawText5x7(r, "SCORE", scoreLabel, labelColor);
+    drawText5x7(r, "BEST", bestLabel, labelColor);
+
+    drawNumber(r, scoreNum, score);
+    drawNumber(r, bestNum, bestScore);
+  }
+
   fillRoundRect(r, b, 16, SDL_Color{255, 255, 255, 35});
 
   // Empty cells

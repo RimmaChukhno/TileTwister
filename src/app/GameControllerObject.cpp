@@ -39,6 +39,8 @@ void GameControllerObject::beginMove(Direction dir) {
   const MoveResult mr = m_game.tryMove(dir);
   if (!mr.moved) return;
 
+  if (m_game.score() > m_bestScore) m_bestScore = m_game.score();
+
   m_tiles.clear();
 
   // Build tiles from animation sources.
@@ -85,6 +87,7 @@ void GameControllerObject::handleEvent(const SDL_Event& e) {
 
   if (key == SDLK_r) {
     m_game.reset();
+    // Keep best score across resets.
     m_activeMove.active = false;
     m_game.commitPendingSpawn();
     rebuildTilesFromGrid();
@@ -101,6 +104,8 @@ void GameControllerObject::handleEvent(const SDL_Event& e) {
 
 void GameControllerObject::update(float dtSec) {
   for (auto& kv : m_tiles) kv.second.update(dtSec);
+
+  if (m_game.score() > m_bestScore) m_bestScore = m_game.score();
 
   if (!m_activeMove.active) return;
 
@@ -138,7 +143,7 @@ void GameControllerObject::update(float dtSec) {
 
 void GameControllerObject::render(SDL_Renderer* renderer) {
   m_renderer.render(renderer, m_game, m_tiles, m_windowW, m_windowH,
-                    m_game.isGameOver());
+                    m_game.score(), m_bestScore, m_game.isGameOver());
 }
 
 

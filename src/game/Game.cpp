@@ -17,6 +17,7 @@ struct LineMoveOut {
   std::vector<std::pair<int, int>> srcToDst; // (srcIndex -> dstIndex), per tile
   std::vector<int> mergedDst;                // dst indices that are merge results
   bool changed = false;
+  int scoreGained = 0;
 };
 
 // Processes a line of 4 cells in "forward" direction (index 0 is the side
@@ -36,6 +37,7 @@ LineMoveOut moveLineForward(const std::array<int, 4>& in) {
         items[i].value == items[i + 1].value) {
       // Merge: two tiles go into one cell.
       out.values[write] = items[i].value * 2;
+      out.scoreGained += out.values[write];
       out.srcToDst.emplace_back(items[i].srcIndex, write);
       out.srcToDst.emplace_back(items[i + 1].srcIndex, write);
       out.mergedDst.push_back(write);
@@ -77,6 +79,7 @@ void Game::spawnInitial() {
 void Game::reset() {
   clearGrid();
   m_pendingSpawn.reset();
+  m_score = 0;
   spawnInitial();
 }
 
@@ -116,6 +119,7 @@ MoveResult Game::tryMove(Direction dir) {
   };
 
   const bool isRowLine = (dir == Direction::Left || dir == Direction::Right);
+  int gainedTotal = 0;
 
   for (int line = 0; line < 4; ++line) {
     std::array<int, 4> in{};
@@ -131,6 +135,7 @@ MoveResult Game::tryMove(Direction dir) {
 
     const LineMoveOut out = moveLineForward(in);
     if (out.changed) res.moved = true;
+    gainedTotal += out.scoreGained;
 
     // Write back to outGrid and build animations.
     for (int i = 0; i < 4; ++i) {
@@ -170,6 +175,8 @@ MoveResult Game::tryMove(Direction dir) {
   }
 
   if (!res.moved) return res;
+
+  m_score += gainedTotal;
 
   // Apply post-move grid (pre-spawn) immediately.
   std::memcpy(m_grid, outGrid, sizeof(m_grid));
@@ -214,6 +221,7 @@ bool Game::isGameOver() const { return !hasAnyMove(m_grid); }
 void Game::setGridForTest(const int grid[4][4]) {
   std::memcpy(m_grid, grid, sizeof(m_grid));
   m_pendingSpawn.reset();
+  m_score = 0;
 }
 
 void Game::clearPendingSpawnForTest() { m_pendingSpawn.reset(); }
