@@ -8,270 +8,283 @@
 #include <cmath>
 #include <sstream>
 
-namespace {
+namespace
+{
 
-SDL_Color textColorFor(int value) {
-  // Dark text on light tiles, white text on strong tiles.
-  if (value <= 8) return SDL_Color{80, 40, 60, 255};
-  return SDL_Color{255, 255, 255, 235};
-}
-
-void setColor(SDL_Renderer* r, SDL_Color c) {
-  SDL_SetRenderDrawColor(r, c.r, c.g, c.b, c.a);
-}
-
-// Minimal 5x7 bitmap font for the HUD labels.
-// Only includes characters needed for "SCORE" and "BEST".
-const char* glyph5x7(char ch) {
-  switch (ch) {
-  case '0':
-    return "01110"
-           "10001"
-           "10011"
-           "10101"
-           "11001"
-           "10001"
-           "01110";
-  case '1':
-    return "00100"
-           "01100"
-           "00100"
-           "00100"
-           "00100"
-           "00100"
-           "01110";
-  case '2':
-    return "01110"
-           "10001"
-           "00001"
-           "00010"
-           "00100"
-           "01000"
-           "11111";
-  case '3':
-    return "11110"
-           "00001"
-           "00001"
-           "01110"
-           "00001"
-           "00001"
-           "11110";
-  case '4':
-    return "00010"
-           "00110"
-           "01010"
-           "10010"
-           "11111"
-           "00010"
-           "00010";
-  case '5':
-    return "11111"
-           "10000"
-           "10000"
-           "11110"
-           "00001"
-           "00001"
-           "11110";
-  case '6':
-    return "01110"
-           "10000"
-           "10000"
-           "11110"
-           "10001"
-           "10001"
-           "01110";
-  case '7':
-    return "11111"
-           "00001"
-           "00010"
-           "00100"
-           "01000"
-           "01000"
-           "01000";
-  case '8':
-    return "01110"
-           "10001"
-           "10001"
-           "01110"
-           "10001"
-           "10001"
-           "01110";
-  case '9':
-    return "01110"
-           "10001"
-           "10001"
-           "01111"
-           "00001"
-           "00001"
-           "01110";
-  case 'S':
-    return "01111"
-           "10000"
-           "10000"
-           "01110"
-           "00001"
-           "00001"
-           "11110";
-  case 'C':
-    return "01111"
-           "10000"
-           "10000"
-           "10000"
-           "10000"
-           "10000"
-           "01111";
-  case 'O':
-    return "01110"
-           "10001"
-           "10001"
-           "10001"
-           "10001"
-           "10001"
-           "01110";
-  case 'R':
-    return "11110"
-           "10001"
-           "10001"
-           "11110"
-           "10100"
-           "10010"
-           "10001";
-  case 'E':
-    return "11111"
-           "10000"
-           "10000"
-           "11110"
-           "10000"
-           "10000"
-           "11111";
-  case 'B':
-    return "11110"
-           "10001"
-           "10001"
-           "11110"
-           "10001"
-           "10001"
-           "11110";
-  case 'T':
-    return "11111"
-           "00100"
-           "00100"
-           "00100"
-           "00100"
-           "00100"
-           "00100";
-  case 'L':
-    return "10000"
-           "10000"
-           "10000"
-           "10000"
-           "10000"
-           "10000"
-           "11111";
-  case 'J':
-    return "00111"
-           "00010"
-           "00010"
-           "00010"
-           "00010"
-           "10010"
-           "01100";
-  case 'U':
-    return "10001"
-           "10001"
-           "10001"
-           "10001"
-           "10001"
-           "10001"
-           "01110";
-  case 'M':
-    return "10001"
-           "11011"
-           "10101"
-           "10101"
-           "10001"
-           "10001"
-           "10001";
-  case 'N':
-    return "10001"
-           "11001"
-           "10101"
-           "10011"
-           "10001"
-           "10001"
-           "10001";
-  case 'I':
-    return "01110"
-           "00100"
-           "00100"
-           "00100"
-           "00100"
-           "00100"
-           "01110";
-  case '?':
-    return "01110"
-           "10001"
-           "00001"
-           "00010"
-           "00100"
-           "00000"
-           "00100";
-  case ' ':
-  default:
-    return "00000"
-           "00000"
-           "00000"
-           "00000"
-           "00000"
-           "00000"
-           "00000";
+  SDL_Color textColorFor(int value)
+  {
+    // Dark text on light tiles, white text on strong tiles.
+    if (value <= 8)
+      return SDL_Color{80, 40, 60, 255};
+    return SDL_Color{255, 255, 255, 235};
   }
-}
 
-void drawText5x7(SDL_Renderer* r, const std::string& text, const SDL_Rect& rect,
-                 SDL_Color color) {
-  setColor(r, color);
-  const int cols = 5;
-  const int rows = 7;
-  const int gapPx = std::max(1, rect.w / 80);
-  const int charGap = std::max(1, gapPx * 2);
+  void setColor(SDL_Renderer *r, SDL_Color c)
+  {
+    SDL_SetRenderDrawColor(r, c.r, c.g, c.b, c.a);
+  }
 
-  const int n = static_cast<int>(text.size());
-  if (n <= 0) return;
+  // Minimal 5x7 bitmap font for the HUD labels.
+  // Only includes characters needed for "SCORE" and "BEST".
+  const char *glyph5x7(char ch)
+  {
+    switch (ch)
+    {
+    case '0':
+      return "01110"
+             "10001"
+             "10011"
+             "10101"
+             "11001"
+             "10001"
+             "01110";
+    case '1':
+      return "00100"
+             "01100"
+             "00100"
+             "00100"
+             "00100"
+             "00100"
+             "01110";
+    case '2':
+      return "01110"
+             "10001"
+             "00001"
+             "00010"
+             "00100"
+             "01000"
+             "11111";
+    case '3':
+      return "11110"
+             "00001"
+             "00001"
+             "01110"
+             "00001"
+             "00001"
+             "11110";
+    case '4':
+      return "00010"
+             "00110"
+             "01010"
+             "10010"
+             "11111"
+             "00010"
+             "00010";
+    case '5':
+      return "11111"
+             "10000"
+             "10000"
+             "11110"
+             "00001"
+             "00001"
+             "11110";
+    case '6':
+      return "01110"
+             "10000"
+             "10000"
+             "11110"
+             "10001"
+             "10001"
+             "01110";
+    case '7':
+      return "11111"
+             "00001"
+             "00010"
+             "00100"
+             "01000"
+             "01000"
+             "01000";
+    case '8':
+      return "01110"
+             "10001"
+             "10001"
+             "01110"
+             "10001"
+             "10001"
+             "01110";
+    case '9':
+      return "01110"
+             "10001"
+             "10001"
+             "01111"
+             "00001"
+             "00001"
+             "01110";
+    case 'S':
+      return "01111"
+             "10000"
+             "10000"
+             "01110"
+             "00001"
+             "00001"
+             "11110";
+    case 'C':
+      return "01111"
+             "10000"
+             "10000"
+             "10000"
+             "10000"
+             "10000"
+             "01111";
+    case 'O':
+      return "01110"
+             "10001"
+             "10001"
+             "10001"
+             "10001"
+             "10001"
+             "01110";
+    case 'R':
+      return "11110"
+             "10001"
+             "10001"
+             "11110"
+             "10100"
+             "10010"
+             "10001";
+    case 'E':
+      return "11111"
+             "10000"
+             "10000"
+             "11110"
+             "10000"
+             "10000"
+             "11111";
+    case 'B':
+      return "11110"
+             "10001"
+             "10001"
+             "11110"
+             "10001"
+             "10001"
+             "11110";
+    case 'T':
+      return "11111"
+             "00100"
+             "00100"
+             "00100"
+             "00100"
+             "00100"
+             "00100";
+    case 'L':
+      return "10000"
+             "10000"
+             "10000"
+             "10000"
+             "10000"
+             "10000"
+             "11111";
+    case 'J':
+      return "00111"
+             "00010"
+             "00010"
+             "00010"
+             "00010"
+             "10010"
+             "01100";
+    case 'U':
+      return "10001"
+             "10001"
+             "10001"
+             "10001"
+             "10001"
+             "10001"
+             "01110";
+    case 'M':
+      return "10001"
+             "11011"
+             "10101"
+             "10101"
+             "10001"
+             "10001"
+             "10001";
+    case 'N':
+      return "10001"
+             "11001"
+             "10101"
+             "10011"
+             "10001"
+             "10001"
+             "10001";
+    case 'I':
+      return "01110"
+             "00100"
+             "00100"
+             "00100"
+             "00100"
+             "00100"
+             "01110";
+    case '?':
+      return "01110"
+             "10001"
+             "00001"
+             "00010"
+             "00100"
+             "00000"
+             "00100";
+    case ' ':
+    default:
+      return "00000"
+             "00000"
+             "00000"
+             "00000"
+             "00000"
+             "00000"
+             "00000";
+    }
+  }
 
-  // Compute pixel size so the text fits.
-  const int availW = std::max(1, rect.w);
-  const int availH = std::max(1, rect.h);
-  const int cellW = std::max(1, (availW - (n - 1) * charGap) / (n * cols));
-  const int cellH = std::max(1, availH / rows);
-  const int cell = std::min(cellW, cellH);
+  void drawText5x7(SDL_Renderer *r, const std::string &text, const SDL_Rect &rect,
+                   SDL_Color color)
+  {
+    setColor(r, color);
+    const int cols = 5;
+    const int rows = 7;
+    const int gapPx = std::max(1, rect.w / 80);
+    const int charGap = std::max(1, gapPx * 2);
 
-  const int textW = n * cols * cell + (n - 1) * charGap;
-  const int textH = rows * cell;
-  int x0 = rect.x + (rect.w - textW) / 2;
-  int y0 = rect.y + (rect.h - textH) / 2;
+    const int n = static_cast<int>(text.size());
+    if (n <= 0)
+      return;
 
-  for (int i = 0; i < n; ++i) {
-    const char up =
-        (text[i] >= 'a' && text[i] <= 'z') ? (text[i] - 'a' + 'A') : text[i];
-    const char* g = glyph5x7(up);
-    for (int ry = 0; ry < rows; ++ry) {
-      for (int cx = 0; cx < cols; ++cx) {
-        const char bit = g[ry * cols + cx];
-        if (bit == '1') {
-          SDL_Rect px{ x0 + i * (cols * cell + charGap) + cx * cell,
-                       y0 + ry * cell,
-                       cell, cell };
-          SDL_RenderFillRect(r, &px);
+    // Compute pixel size so the text fits.
+    const int availW = std::max(1, rect.w);
+    const int availH = std::max(1, rect.h);
+    const int cellW = std::max(1, (availW - (n - 1) * charGap) / (n * cols));
+    const int cellH = std::max(1, availH / rows);
+    const int cell = std::min(cellW, cellH);
+
+    const int textW = n * cols * cell + (n - 1) * charGap;
+    const int textH = rows * cell;
+    int x0 = rect.x + (rect.w - textW) / 2;
+    int y0 = rect.y + (rect.h - textH) / 2;
+
+    for (int i = 0; i < n; ++i)
+    {
+      const char up =
+          (text[i] >= 'a' && text[i] <= 'z') ? (text[i] - 'a' + 'A') : text[i];
+      const char *g = glyph5x7(up);
+      for (int ry = 0; ry < rows; ++ry)
+      {
+        for (int cx = 0; cx < cols; ++cx)
+        {
+          const char bit = g[ry * cols + cx];
+          if (bit == '1')
+          {
+            SDL_Rect px{x0 + i * (cols * cell + charGap) + cx * cell,
+                        y0 + ry * cell,
+                        cell, cell};
+            SDL_RenderFillRect(r, &px);
+          }
         }
       }
     }
   }
-}
 
 } // namespace
 
-SDL_Rect Renderer::computeBoardRect(int windowW, int windowH) {
+SDL_Rect Renderer::computeBoardRect(int windowW, int windowH)
+{
   // Reserve space at the top for the HUD (score/best).
   const int outerMargin = 40;
   const int hudH = 80;
@@ -283,7 +296,8 @@ SDL_Rect Renderer::computeBoardRect(int windowW, int windowH) {
   return SDL_Rect{x, y, size, size};
 }
 
-SDL_Rect Renderer::computeGameOverPanelRect(int windowW, int windowH) {
+SDL_Rect Renderer::computeGameOverPanelRect(int windowW, int windowH)
+{
   const SDL_Rect b = computeBoardRect(windowW, windowH);
   const int w = static_cast<int>(std::round(b.w * 0.86f));
   const int h = static_cast<int>(std::round(b.h * 0.42f));
@@ -292,7 +306,8 @@ SDL_Rect Renderer::computeGameOverPanelRect(int windowW, int windowH) {
   return SDL_Rect{x, y, w, h};
 }
 
-SDL_Rect Renderer::computeGameOverButtonRect(int windowW, int windowH) {
+SDL_Rect Renderer::computeGameOverButtonRect(int windowW, int windowH)
+{
   const SDL_Rect p = computeGameOverPanelRect(windowW, windowH);
   const int pad = std::max(12, p.w / 20);
   const int btnH = std::max(40, p.h / 4);
@@ -302,12 +317,14 @@ SDL_Rect Renderer::computeGameOverButtonRect(int windowW, int windowH) {
   return SDL_Rect{x, y, w, btnH};
 }
 
-SDL_Rect Renderer::boardRect(int windowW, int windowH) const {
+SDL_Rect Renderer::boardRect(int windowW, int windowH) const
+{
   return computeBoardRect(windowW, windowH);
 }
 
 SDL_Rect Renderer::cellRect(int windowW, int windowH, float row,
-                            float col) const {
+                            float col) const
+{
   const SDL_Rect b = boardRect(windowW, windowH);
   const int gap = 12;
   const int cell = (b.w - gap * 5) / 4;
@@ -321,8 +338,9 @@ SDL_Rect Renderer::cellRect(int windowW, int windowH, float row,
                   static_cast<int>(std::round(py)), cell, cell};
 }
 
-void Renderer::fillRoundRect(SDL_Renderer* r, const SDL_Rect& rect, int radius,
-                             SDL_Color color) const {
+void Renderer::fillRoundRect(SDL_Renderer *r, const SDL_Rect &rect, int radius,
+                             SDL_Color color) const
+{
   // Simple approximation: fill rect.
   // (Keeping dependencies minimal.)
   setColor(r, color);
@@ -330,8 +348,9 @@ void Renderer::fillRoundRect(SDL_Renderer* r, const SDL_Rect& rect, int radius,
   (void)radius;
 }
 
-void Renderer::drawDigit(SDL_Renderer* r, int digit, int x, int y, int w, int h,
-                         SDL_Color color) const {
+void Renderer::drawDigit(SDL_Renderer *r, int digit, int x, int y, int w, int h,
+                         SDL_Color color) const
+{
   // Seven segments: a b c d e f g
   //   a
   // f   b
@@ -359,8 +378,10 @@ void Renderer::drawDigit(SDL_Renderer* r, int digit, int x, int y, int w, int h,
   const int t = std::max(1, minSide / 7); // segment thickness
   const int pad = std::max(1, t);         // inner padding
 
-  auto segRect = [&](char seg) -> SDL_Rect {
-    switch (seg) {
+  auto segRect = [&](char seg) -> SDL_Rect
+  {
+    switch (seg)
+    {
     case 'a':
       return SDL_Rect{x + pad, y + pad, w - 2 * pad, t};
     case 'd':
@@ -381,8 +402,10 @@ void Renderer::drawDigit(SDL_Renderer* r, int digit, int x, int y, int w, int h,
     }
   };
 
-  auto drawIf = [&](char seg, int bit) {
-    if (mask & bit) {
+  auto drawIf = [&](char seg, int bit)
+  {
+    if (mask & bit)
+    {
       SDL_Rect rr = segRect(seg);
       SDL_RenderFillRect(r, &rr);
     }
@@ -397,9 +420,11 @@ void Renderer::drawDigit(SDL_Renderer* r, int digit, int x, int y, int w, int h,
   drawIf('g', 1 << 0);
 }
 
-void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
-                          int value) const {
-  if (value <= 0) return;
+void Renderer::drawNumber(SDL_Renderer *r, const SDL_Rect &rect,
+                          int value) const
+{
+  if (value <= 0)
+    return;
 
   std::ostringstream ss;
   ss << value;
@@ -426,17 +451,19 @@ void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
   int x = rect.x + (rect.w - totalW) / 2;
   const int y = rect.y + (rect.h - digitH) / 2;
 
-  for (char ch : s) {
+  for (char ch : s)
+  {
     const int d = ch - '0';
     drawDigit(r, d, x, y, digitW, digitH, color);
     x += digitW + gap;
   }
 }
 
-void Renderer::render(SDL_Renderer* r, const Game& game,
-                      const std::unordered_map<int, Tile>& tiles, int windowW,
+void Renderer::render(SDL_Renderer *r, const Game &game,
+                      const std::unordered_map<int, Tile> &tiles, int windowW,
                       int windowH, int score, int bestScore, bool gameOver,
-                      bool gameOverButtonHover) {
+                      bool gameOverButtonHover)
+{
   (void)game;
   // Background
   setColor(r, Palette::backgroundPink());
@@ -495,8 +522,10 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
   fillRoundRect(r, b, 16, SDL_Color{255, 255, 255, 35});
 
   // Empty cells
-  for (int rr = 0; rr < 4; ++rr) {
-    for (int cc = 0; cc < 4; ++cc) {
+  for (int rr = 0; rr < 4; ++rr)
+  {
+    for (int cc = 0; cc < 4; ++cc)
+    {
       SDL_Rect cell = cellRect(windowW, windowH, static_cast<float>(rr),
                                static_cast<float>(cc));
       fillRoundRect(r, cell, 12, Palette::gridEmptyCellColor());
@@ -505,14 +534,18 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
 
   // Tiles
   // Draw in value order so larger tiles appear on top (helps pop look).
-  std::vector<const Tile*> drawList;
+  std::vector<const Tile *> drawList;
   drawList.reserve(tiles.size());
-  for (const auto& kv : tiles) drawList.push_back(&kv.second);
+  for (const auto &kv : tiles)
+    drawList.push_back(&kv.second);
   std::sort(drawList.begin(), drawList.end(),
-            [](const Tile* a, const Tile* b) { return a->value() < b->value(); });
+            [](const Tile *a, const Tile *b)
+            { return a->value() < b->value(); });
 
-  for (const Tile* t : drawList) {
-    if (t->value() <= 0) continue;
+  for (const Tile *t : drawList)
+  {
+    if (t->value() <= 0)
+      continue;
 
     float row = 0.0f, col = 0.0f;
     t->interpolatedPos(row, col);
@@ -520,7 +553,8 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
 
     const float scale = t->popScale();
     SDL_Rect rect = base;
-    if (scale != 1.0f) {
+    if (scale != 1.0f)
+    {
       const int cx = base.x + base.w / 2;
       const int cy = base.y + base.h / 2;
       rect.w = static_cast<int>(std::round(base.w * scale));
@@ -538,13 +572,15 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
     drawNumber(r, rect, t->value());
   }
 
-  if (gameOver) {
+  if (gameOver)
+  {
     // Dim the board and show a centered "window" with restart button.
-    setColor(r, SDL_Color{0, 0, 0, 120});
+    // Less transparent overlay for better readability.
+    setColor(r, SDL_Color{0, 0, 0, 170});
     SDL_RenderFillRect(r, &b);
 
     const SDL_Rect panel = computeGameOverPanelRect(windowW, windowH);
-    fillRoundRect(r, panel, 14, SDL_Color{255, 255, 255, 70});
+    fillRoundRect(r, panel, 14, SDL_Color{255, 255, 255, 210});
 
     // Message (no accents in bitmap font): "LE JEU EST TERMINE"
     const int pad = std::max(12, panel.w / 20);
@@ -559,8 +595,8 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
 
     // Button
     const SDL_Rect btn = computeGameOverButtonRect(windowW, windowH);
-    const SDL_Color btnFill = gameOverButtonHover ? SDL_Color{255, 255, 255, 110}
-                                                  : SDL_Color{255, 255, 255, 80};
+    const SDL_Color btnFill = gameOverButtonHover ? SDL_Color{255, 255, 255, 255}
+                                                  : SDL_Color{255, 255, 255, 235};
     fillRoundRect(r, btn, 12, btnFill);
     setColor(r, SDL_Color{80, 40, 60, 80});
     SDL_RenderDrawRect(r, &btn);
@@ -571,5 +607,3 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
 
   SDL_RenderPresent(r);
 }
-
-
