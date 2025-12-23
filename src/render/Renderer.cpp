@@ -24,6 +24,86 @@ void setColor(SDL_Renderer* r, SDL_Color c) {
 // Only includes characters needed for "SCORE" and "BEST".
 const char* glyph5x7(char ch) {
   switch (ch) {
+  case '0':
+    return "01110"
+           "10001"
+           "10011"
+           "10101"
+           "11001"
+           "10001"
+           "01110";
+  case '1':
+    return "00100"
+           "01100"
+           "00100"
+           "00100"
+           "00100"
+           "00100"
+           "01110";
+  case '2':
+    return "01110"
+           "10001"
+           "00001"
+           "00010"
+           "00100"
+           "01000"
+           "11111";
+  case '3':
+    return "11110"
+           "00001"
+           "00001"
+           "01110"
+           "00001"
+           "00001"
+           "11110";
+  case '4':
+    return "00010"
+           "00110"
+           "01010"
+           "10010"
+           "11111"
+           "00010"
+           "00010";
+  case '5':
+    return "11111"
+           "10000"
+           "10000"
+           "11110"
+           "00001"
+           "00001"
+           "11110";
+  case '6':
+    return "01110"
+           "10000"
+           "10000"
+           "11110"
+           "10001"
+           "10001"
+           "01110";
+  case '7':
+    return "11111"
+           "00001"
+           "00010"
+           "00100"
+           "01000"
+           "01000"
+           "01000";
+  case '8':
+    return "01110"
+           "10001"
+           "10001"
+           "01110"
+           "10001"
+           "10001"
+           "01110";
+  case '9':
+    return "01110"
+           "10001"
+           "10001"
+           "01111"
+           "00001"
+           "00001"
+           "01110";
   case 'S':
     return "01111"
            "10000"
@@ -302,22 +382,34 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
 
     const int pad = 10;
     const int labelH = std::max(16, scoreBox.h / 3);
+    // Give extra room so score digits don't look crushed.
+    const int numPad = pad + 4;
+    const int numTopGap = 6;
 
     SDL_Rect scoreLabel{scoreBox.x + pad, scoreBox.y + pad,
                         scoreBox.w - 2 * pad, labelH};
     SDL_Rect bestLabel{bestBox.x + pad, bestBox.y + pad,
                        bestBox.w - 2 * pad, labelH};
-    SDL_Rect scoreNum{scoreBox.x + pad, scoreBox.y + pad + labelH,
-                      scoreBox.w - 2 * pad, scoreBox.h - (2 * pad + labelH)};
-    SDL_Rect bestNum{bestBox.x + pad, bestBox.y + pad + labelH,
-                     bestBox.w - 2 * pad, bestBox.h - (2 * pad + labelH)};
+    SDL_Rect scoreNum{
+        scoreBox.x + numPad,
+        scoreBox.y + pad + labelH + numTopGap,
+        scoreBox.w - 2 * numPad,
+        scoreBox.h - (pad + labelH + numTopGap) - numPad,
+    };
+    SDL_Rect bestNum{
+        bestBox.x + numPad,
+        bestBox.y + pad + labelH + numTopGap,
+        bestBox.w - 2 * numPad,
+        bestBox.h - (pad + labelH + numTopGap) - numPad,
+    };
 
     const SDL_Color labelColor{80, 40, 60, 255};
     drawText5x7(r, "SCORE", scoreLabel, labelColor);
     drawText5x7(r, "BEST", bestLabel, labelColor);
 
-    drawNumber(r, scoreNum, score);
-    drawNumber(r, bestNum, bestScore);
+    // HUD numbers: square pixel font so they stay readable and compact.
+    drawText5x7(r, std::to_string(score), scoreNum, labelColor);
+    drawText5x7(r, std::to_string(bestScore), bestNum, labelColor);
   }
 
   fillRoundRect(r, b, 16, SDL_Color{255, 255, 255, 35});
