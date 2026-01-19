@@ -1,9 +1,8 @@
-#include "Renderer.h"
+#include "Renderer.hpp"
 
-#include "Game.h"
-#include "Tile.h"
-#include "Utils.h"
-
+#include "Game.hpp"
+#include "Tile.hpp"
+#include "Utils.hpp"
 #include <algorithm>
 #include <cmath>
 #include <sstream>
@@ -146,7 +145,7 @@ void Renderer::drawNumber(SDL_Renderer* r, const SDL_Rect& rect,
 
 void Renderer::render(SDL_Renderer* r, const Game& game,
                       const std::unordered_map<int, Tile>& tiles, int windowW,
-                      int windowH, bool gameOver) {
+                      int windowH, bool gameOver, int score) {
   // Background
   setColor(r, Utils::backgroundPink());
   SDL_RenderClear(r);
@@ -205,6 +204,16 @@ void Renderer::render(SDL_Renderer* r, const Game& game,
     SDL_RenderFillRect(r, &b);
     // "GAME OVER" using digits isn't possible; show 2048-style by drawing 0
     // and rely on instructions (R to restart). Keep minimal.
+  }
+
+  // Draw score in top right
+  {
+    const int scoreX = windowW - 200;
+    const int scoreY = 20;
+    const int scoreW = 180;
+    const int scoreH = 40;
+    SDL_Rect scoreRect{scoreX, scoreY, scoreW, scoreH};
+    drawNumber(r, scoreRect, score);
   }
 
   SDL_RenderPresent(r);

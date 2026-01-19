@@ -1,7 +1,7 @@
-#include "Game.h"
-#include "Renderer.h"
-#include "Tile.h"
-#include "Window.h"
+#include "Game.hpp"
+#include "Renderer.hpp"
+#include "Tile.hpp"
+#include "Window.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -175,7 +175,7 @@ int main(int, char**) {
 
     // Render
     renderer.render(win.renderer(), game, tiles, win.width(), win.height(),
-                    game.isGameOver());
+                    game.isGameOver(), game.score());
   }
 
   win.shutdown();

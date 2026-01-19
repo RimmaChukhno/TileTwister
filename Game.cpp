@@ -1,6 +1,6 @@
-#include "Game.h"
+#include "Game.hpp"
 
-#include "Utils.h"
+#include "Utils.hpp"
 
 #include <array>
 #include <cstring>
@@ -9,13 +9,13 @@ namespace {
 
 struct LineItem {
   int value = 0;
-  int srcIndex = -1; // 0..3 position in the line (before move)
+  int srcIndex = -1; 
 };
 
 struct LineMoveOut {
   std::array<int, 4> values{0, 0, 0, 0};
-  std::vector<std::pair<int, int>> srcToDst; // (srcIndex -> dstIndex), per tile
-  std::vector<int> mergedDst;                // dst indices that are merge results
+  std::vector<std::pair<int, int>> srcToDst; 
+  std::vector<int> mergedDst;                
   bool changed = false;
 };
 
@@ -77,6 +77,7 @@ void Game::spawnInitial() {
 void Game::reset() {
   clearGrid();
   m_pendingSpawn.reset();
+  m_score.reset();
   spawnInitial();
 }
 
@@ -166,6 +167,7 @@ MoveResult Game::tryMove(Direction dir) {
       } else {
         res.mergedCells.push_back(Cell{dstAbs, line});
       }
+      m_score.addScore(out.values[mergedDstFwd]);
     }
   }
 
